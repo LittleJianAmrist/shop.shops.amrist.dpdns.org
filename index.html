@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop</title>
+    <style>
+        /*
+        * CSS 部分：精心模拟 Fluent UI 风格
+        * 目标是尽可能接近官方控件的视觉表现，但仍是纯CSS实现。
+        */
+
+        /* 定义 Fluent UI 的基准字体和通用样式 */
+        body {
+            font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI Symbol', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            background-color: #F3F2F1; /* Fluent UI 常见的背景色 */
+            color: #323130; /* 默认文字颜色 */
+            line-height: 1.4;
+            -webkit-font-smoothing: antialiased; /* 抗锯齿，使字体更平滑 */
+            -moz-osx-font-smoothing: grayscale; /* 抗锯齿 */
+        }
+
+        /* 全局重置，去除默认焦点轮廓，Fluent UI 常用自定义焦点环 */
+        *:focus {
+            outline: none;
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #006B3C; /* 您的深绿色主题色 */
+            color: white;
+            padding: 0 24px; /* 增加左右内边距 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24); /* 更细致的阴影 */
+            height: 48px; /* Fluent UI 导航栏常见高度 */
+            box-sizing: border-box;
+        }
+
+        .navbar-brand {
+            font-size: 20px; /* 品牌文字大小 */
+            font-weight: 600; /* 稍粗 */
+            text-decoration: none;
+            color: white;
+            letter-spacing: -0.2px; /* 增加一点字距 */
+        }
+
+        /* 导航右侧容器，用于金币信息和按钮 */
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px; /* 按钮和金币信息之间的间距 */
+        }
+
+        .navbar-button {
+            background-color: #197F4E; /* 稍浅的绿色，用于按钮 */
+            color: white;
+            padding: 6px 16px; /* 调整内边距 */
+            border: none;
+            border-radius: 2px; /* Fluent UI 按钮常见的小圆角 */
+            cursor: pointer;
+            font-size: 14px; /* 按钮文字大小 */
+            font-weight: 400; /* 普通字重 */
+            transition: background-color 0.2s ease, box-shadow 0.1s ease;
+            position: relative; /* 用于自定义焦点环 */
+        }
+
+        .navbar-button:hover {
+            background-color: #00512E; /* 鼠标悬停时的深色 */
+        }
+
+        .navbar-button:active {
+            background-color: #003C22; /* 鼠标点击时的更深色 */
+        }
+
+        /* Fluent UI 风格的焦点环 (使用伪元素实现) */
+        .navbar-button::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            bottom: -2px;
+            left: -2px;
+            border: 2px solid transparent;
+            border-radius: 4px; /* 比按钮略大的圆角 */
+            pointer-events: none;
+            transition: border-color 0.1s ease;
+        }
+
+        .navbar-button:focus::after {
+            border-color: rgba(0, 107, 60, 0.5); /* 焦点环颜色 */
+        }
+
+        /* 金币信息样式 */
+        .coin-info {
+            color: white;
+            font-size: 15px;
+            font-weight: 500;
+            display: flex; /* 让图标和文字对齐 */
+            align-items: center;
+            gap: 6px; /* 图标和文字之间的间距 */
+        }
+
+        .coin-info .icon {
+            font-size: 18px; /* 图标大小 */
+            line-height: 1; /* 确保图标对齐 */
+            vertical-align: middle;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .main-content h1 {
+            color: #201F1E;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 30px; /* Increased margin for better separation */
+        }
+
+        /* Product Cards Container */
+        .product-container {
+            display: grid; /* Use CSS Grid for layout */
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsive columns */
+            gap: 24px; /* Space between cards */
+            max-width: 1200px; /* Max width for the container */
+            margin: 0 auto; /* Center the container */
+            padding: 20px;
+        }
+
+        /* Product Card Styling */
+        .product-card {
+            background-color: #FFFFFF;
+            border-radius: 8px; /* Fluent UI like rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.08); /* Soft Fluent UI shadow */
+            overflow: hidden; /* Ensures image corners are rounded */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-align: left; /* Align text within card */
+            display: flex;
+            flex-direction: column; /* Stack content vertically */
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px); /* Lift effect on hover */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1); /* Enhanced shadow on hover */
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px; /* Fixed height for images */
+            object-fit: cover; /* Cover the area, cropping if necessary */
+            border-bottom: 1px solid #E1DFDD; /* Subtle separator */
+        }
+
+        .product-card-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* Allows content to expand */
+        }
+
+        .product-card h3 {
+            font-size: 20px;
+            color: #201F1E;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .product-card p {
+            font-size: 14px;
+            color: #605E5C;
+            margin-bottom: 15px;
+            flex-grow: 1; /* Allows description to take up available space */
+        }
+
+        .product-card .price {
+            font-size: 22px;
+            font-weight: 700;
+            color: #006B3C; /* Theme color for price */
+            margin-top: auto; /* Pushes price to the bottom */
+        }
+
+        /* 模态窗口 (登录/注册/公告) 样式 */
+        .modal {
+            display: none; /* 默认隐藏 */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: flex; /* 使用 flexbox 居中 */
+            justify-content: center;
+            align-items: center;
+            opacity: 0; /* 初始透明度为0 */
+            transition: opacity 0.3s ease; /* 淡入动画 */
+            pointer-events: none; /* 默认不响应事件 */
+        }
+
+        .modal.is-open {
+            opacity: 1;
+            pointer-events: auto; /* 打开时响应事件 */
+        }
+
+        .modal-content {
+            background-color: #FFFFFF;
+            padding: 32px; /* 更大的内边距 */
+            border-radius: 8px; /* Fluent UI 模态窗口的圆角 */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23); /* 更强的阴影 */
+            width: 90%;
+            max-width: 400px; /* 调整最大宽度 */
+            position: relative;
+            box-sizing: border-box;
+            transform: translateY(20px); /* 初始位置略微下移 */
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out; /* 弹入动画 */
+        }
+
+        .modal.is-open .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-close-button {
+            color: #605E5C; /* 关闭按钮颜色 */
+            font-size: 24px; /* 调整大小 */
+            font-weight: normal;
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+            padding: 4px; /* 增加点击区域 */
+        }
+
+        .modal-close-button:hover {
+            color: #323130;
+        }
+
+        .modal h2 {
+            color: #323130;
+            margin-top: 0;
+            margin-bottom: 28px; /* 增加底部间距 */
+            text-align: center;
+            font-size: 28px; /* 标题字号 */
+            font-weight: 600;
+        }
+
+        /* 表单组样式 */
+        .form-group {
+            margin-bottom: 16px; /* 调整间距 */
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #323130;
+            font-size: 14px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 8px 12px; /* 调整内边距 */
+            border: 1px solid #C8C6C4; /* Fluent UI 边框色 */
+            border-radius: 2px;
+            font-size: 15px; /* 调整字号 */
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            line-height: 1.5; /* 确保文字居中 */
+        }
+
+        .form-group input[type="text"]:hover,
+        .form-group input[type="password"]:hover {
+            border-color: #A19F9D; /* 鼠标悬停时边框色 */
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="password"]:focus {
+            border-color: #006B3C; /* 焦点边框色为主题绿 */
+            box-shadow: 0 0 0 1px #006B3C; /* Fluent UI 焦点环 */
+        }
+
+        /* 模态窗口中的按钮样式 */
+        .modal-action-button {
+            background-color: #006B3C; /* 主题绿色 */
+            color: white;
+            padding: 10px 16px; /* 调整内边距 */
+            border: none;
+            border-radius: 2px; /* 按钮圆角 */
+            cursor: pointer;
+            font-size: 15px; /* 按钮文字大小 */
+            font-weight: 600; /* 按钮文字稍粗 */
+            width: 100%;
+            margin-top: 20px; /* 调整顶部间距 */
+            transition: background-color 0.2s ease, box-shadow 0.1s ease;
+            position: relative; /* 用于自定义焦点环 */
+        }
+
+        .modal-action-button:hover {
+            background-color: #00512E;
+        }
+
+        .modal-action-button:active {
+            background-color: #003C22;
+        }
+
+        .modal-action-button::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            bottom: -2px;
+            left: -2px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            pointer-events: none;
+            transition: border-color 0.1s ease;
+        }
+
+        .modal-action-button:focus::after {
+            border-color: rgba(0, 107, 60, 0.5); /* 焦点环颜色 */
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">Shop</a>
+        <div class="navbar-right">
+            <span id="coinInfo" class="coin-info" style="display: none;">
+                <span class="icon">&#128176;</span> 金币数量：<span id="coinCount">0</span>
+            </span>
+            <button class="navbar-button" id="loginRegisterBtn">登录</button>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <h1>所有商品</h1>
+        <div class="product-container">
+            <div class="product-card">
+                <img src="https://im.gurl.eu.org/file/AgACAgEAAxkDAAEBQMdohX3mUKjU5Y8Xhzy_TcusOvQP_gACwrAxGwABsylEAfIIHPncKvYBAAMCAANtAAM2BA.png" alt="Product 1">
+                <div class="product-card-content">
+                    <h3>商店账号</h3>
+                    <p>随机的账号，金币数量0~10000不等。(单位：金币/个)</p>
+                    <p>购买代码：00001</p>
+					<p>卖家：匿名</p>
+                    <div class="price">100 金币</div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR08X53GvUlKJetxAw4kda7MSMp7KtUJhbSmA&s" alt="Product 2">
+                <div class="product-card-content">
+                    <h3>张恒瑞的头发</h3>
+                    <p>全世界最真实的张恒瑞的头发。(单位：金币/根)(每个账户限购1根)</p>
+					<p>购买代码：00002</p>
+					<p>卖家：匿名</p>
+                    <div class="price">1,000 金币</div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSr7bbt6ez0OKBMbdCV0zvF5kvBRYbJiOGtiA&s" alt="Product 3">
+                <div class="product-card-content">
+                    <h3>表情包</h3>
+                    <p>幽默招笑表情包。(单位：金币/张)(每个账户限购1张)</p>
+					<p>购买代码：00003</p>
+					<p>卖家：匿名</p>
+                    <div class="price">0.1 金币</div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://i-blog.csdnimg.cn/blog_migrate/7d534d027020ab49338d1dec0fabeac4.png" alt="Product 4">
+                <div class="product-card-content">
+                    <h3>开户网址</h3>
+                    <p>轻轻松松开户所有人。(单位：金币/个)(每个账户限购1个)</p>
+					<p>购买代码：00004</p>
+					<p>卖家：匿名</p>
+                    <div class="price">4,000 金币</div>
+                </div>
+            </div>
+
+			<div class="product-card">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuFhWqjly5HJBX4sJpnDYcyc_EA_mNqSzh2Q&s" alt="Product 5">
+                <div class="product-card-content">
+                    <h3>张恒瑞的梦话</h3>
+                    <p>超级牛逼炫酷炸裂的张恒瑞梦话内容。(单位：金币/条)(每个账户限购2条)</p>
+				    <p>购买代码：00005</p>
+					 <p>卖家：匿名</p>
+                    <div class="price">50 金币</div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1EPcNE9jXR8Qk6CYmAemBhQG7Gnpn2ZP9qA&s" alt="Product 6">
+                <div class="product-card-content">
+                    <h3>雇佣杀手</h3>
+                    <p>专业杀手，随时随地干掉目标。(单位：金币/位)</p>
+					<p>购买代码：00006</p>
+					<p>卖家：匿名</p>
+                    <div class="price">999,999 金币</div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMqATDJ_c6eQtaNwoW6wwiymHne1mVaDZXpA&s" alt="Product 6">
+                <div class="product-card-content">
+                    <h3>PC远程操作</h3>
+                    <p>专业黑客，解决任何电脑问题。(单位：金币/次)</p>
+					<p>购买代码：00007</p>
+					<p>卖家：admin</p>
+                    <div class="price">500 金币</div>
+                </div>
+            </div>
+			
+            <div class="product-card">
+                <img src="https://cdn.hk01.com/di/media/images/1098102/org/e037cdd024705dd22b15ca1dc3240888.jpg/rQf1Nl4W3H4_2-cMyRk6ZgOjkKbWU0-_oHIHk6ByB5M?v=w1920" alt="Product 6">
+                <div class="product-card-content">
+                    <h3>系统鉴定</h3>
+                    <p>PC/Phone 专业系统鉴定，为你鉴别各项系统指标。(单位：金币/次)</p>
+					<p>购买代码：00008</p>
+					<p>卖家：admin</p>
+                    <div class="price">100 金币</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="announcementModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close-button" id="announcementCloseButton">&times;</span>
+            <h2 id="announcementTitle"></h2>
+            <div id="announcementContent"></div>
+        </div>
+    </div>
+
+    <div id="loginRegisterModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close-button">&times;</span>
+            <h2 id="modalTitle">登录</h2>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername">用户名</label>
+                    <input type="text" id="loginUsername" name="username" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginWechat">微信号</label>
+                    <input type="text" id="loginWechat" name="wechat" placeholder="请输入微信号" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">密码</label>
+                    <input type="password" id="loginPassword" name="password" placeholder="请输入密码" required>
+                </div>
+                <button type="submit" class="modal-action-button">登录</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 获取 DOM 元素
+        const modal = document.getElementById("loginRegisterModal");
+        const loginRegisterBtn = document.getElementById("loginRegisterBtn");
+        const closeButton = document.querySelector(".modal-close-button"); // For login modal
+        const loginForm = document.getElementById("loginForm");
+        const modalTitle = document.getElementById("modalTitle");
+        const coinInfo = document.getElementById("coinInfo");
+        const coinCountSpan = document.getElementById("coinCount");
+
+        // 公告模态窗口相关元素
+        const announcementModal = document.getElementById("announcementModal");
+        const announcementCloseButton = document.getElementById("announcementCloseButton");
+        const announcementTitle = document.getElementById("announcementTitle");
+        const announcementContent = document.getElementById("announcementContent");
+
+        // 模拟的用户数据库，现在包含金币数量
+        const users = {
+            "admin": { wechat: "amrist", password: "adminadmin", coins: 999999999999 },
+            "test": { wechat: "test", password: "test", coins: 0 },
+            "pingmin": { wechat: "pingmin", password: "xiaopingmin", coins: 114514 }
+        };
+
+        // 显示登录模态窗口
+        loginRegisterBtn.onclick = function() {
+            modal.classList.add('is-open');
+            loginForm.style.display = "block";
+            modalTitle.textContent = "登录";
+        };
+
+        // 关闭登录模态窗口
+        closeButton.onclick = function() {
+            modal.classList.remove('is-open');
+        };
+
+        // 点击模态窗口外部区域时关闭 (登录模态窗口)
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                modal.classList.remove('is-open');
+            }
+            // 同时处理公告模态窗口的关闭
+            if (event.target === announcementModal) {
+                announcementModal.classList.remove('is-open');
+            }
+        };
+
+        // 登录表单提交处理（仅前端模拟）
+        loginForm.onsubmit = function(event) {
+            event.preventDefault(); // 阻止表单实际提交
+            const username = document.getElementById("loginUsername").value;
+            const wechat = document.getElementById("loginWechat").value;
+            const password = document.getElementById("loginPassword").value;
+
+            if (!username || !wechat || !password) {
+                alert("用户名、微信号和密码都必须输入！");
+                return;
+            }
+
+            let loginSuccess = false;
+            let currentUserCoins = 0;
+
+            // 检查用户名是否存在于我们的模拟数据库中
+            if (users[username]) {
+                // 如果存在，检查微信号和密码是否匹配
+                if (users[username].wechat === wechat && users[username].password === password) {
+                    loginSuccess = true;
+                    currentUserCoins = users[username].coins; // 获取当前用户的金币数量
+                }
+            }
+
+            if (loginSuccess) {
+                alert("登录成功！欢迎, " + username + "会员用户!");
+                modal.classList.remove('is-open'); // 登录成功后关闭模态窗口
+                loginForm.reset(); // 清空表单
+
+                // 登录成功后的新功能
+                loginRegisterBtn.style.display = 'none'; // 隐藏登录按钮
+                coinCountSpan.textContent = currentUserCoins; // 更新金币数量
+                coinInfo.style.display = 'flex'; // 显示金币信息
+            } else {
+                alert("登录失败：用户名、微信号或密码不正确。");
+            }
+        };
+
+        // 公告模态窗口功能
+        document.addEventListener('DOMContentLoaded', (event) => {
+            announcementTitle.innerHTML = "<h2>公告</h2>"; // Use innerHTML for HTML content
+            announcementContent.innerHTML = `
+			    <img src="https://im.gurl.eu.org/file/AgACAgEAAxkDAAEBQM9ohZdcuOBKqbUpNC_Wl3B7P9LmjgACz7AxGwABsylEmTGht6gAASNBAQADAgADbQADNgQ.png">
+				<p>↑ ↑ 联系Shop Manager以交易及投递商品↑ ↑ </p>
+                <p>1. 交易只需记下购买代码和数量，再向Shop Manager发送消息即可。</p>
+				<p>2. 投递商品联系Shop Manager。</p>
+                <p><strong>充值价格参考：<strong></p>
+                <ul>
+                    <li>1×东鹏补水啦(550ml) = 4,000×金币</li>
+                    <li>1×订书机(使用次数) = 50×金币</li>
+                    <li>1×饮品(口) = 25×金币</li>
+                    <li>1×人民币(元) = 1,000×金币</li>
+                </ul>
+                <p>虚拟货币交易，一旦交易完成，一律不可退货</p>
+            `;
+            announcementModal.classList.add('is-open');
+        });
+
+        announcementCloseButton.onclick = function() {
+            announcementModal.classList.remove('is-open');
+        };
+    </script>
+</body>
+</html>
